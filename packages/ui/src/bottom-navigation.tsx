@@ -1,26 +1,24 @@
-import { BookOpen, Home, Library, MessageCircle, Search, TrendingUp, User } from "lucide-react";
+import { Bookmark, Home, Search, Target, User } from "lucide-react";
 
 const items = [
-  ["Home", Home],
-  ["Learn", BookOpen],
-  ["Practice", TrendingUp],
+  ["Today", Home],
+  ["Practice", Target],
+  ["Saved", Bookmark],
   ["Dictionary", Search],
-  ["Conversations", MessageCircle],
-  ["Progress", Library],
   ["Profile", User],
 ] as const;
 
 export type NavigationItem = (typeof items)[number][0];
 
 export function BottomNavigation({
-  active = "Home",
+  active = "Today",
   onSelect,
 }: {
   active?: NavigationItem;
   onSelect?: (item: NavigationItem) => void;
 }) {
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-30 mx-auto flex max-w-3xl justify-between rounded-lg border border-border bg-surface/90 p-2 shadow-2xl backdrop-blur dark:border-white/10 dark:bg-nightSurface/90">
+    <nav className="fixed inset-x-4 bottom-4 z-30 mx-auto flex max-w-lg justify-between rounded-lg border border-border bg-surface/95 p-2 shadow-2xl backdrop-blur dark:border-white/10 dark:bg-nightSurface/95">
       {items.map(([label, Icon]) => (
         <button
           className={
@@ -32,7 +30,7 @@ export function BottomNavigation({
           onClick={() => onSelect?.(label)}
         >
           <Icon className="size-4" />
-          <span className="hidden sm:block">{label}</span>
+          <span>{label}</span>
         </button>
       ))}
     </nav>
