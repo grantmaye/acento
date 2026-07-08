@@ -2,7 +2,17 @@ import type { Lesson } from "@acento/shared";
 import { BookOpen, Heart, Play } from "lucide-react";
 import { Badge, Button, Card } from "./primitives";
 
-export function LessonCard({ lesson }: { lesson: Lesson }) {
+export function LessonCard({
+  isFavorite = false,
+  lesson,
+  onFavorite,
+  onStart,
+}: {
+  isFavorite?: boolean;
+  lesson: Lesson;
+  onFavorite?: (lesson: Lesson) => void;
+  onStart?: (lesson: Lesson) => void;
+}) {
   const firstPhrase = lesson.phrases[0];
 
   return (
@@ -16,8 +26,9 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
           <button
             aria-label={`Favorite ${lesson.title}`}
             className="rounded-md p-2 text-muted transition hover:bg-ink/5 hover:text-sienna dark:hover:bg-white/10"
+            onClick={() => onFavorite?.(lesson)}
           >
-            <Heart className="size-4" />
+            <Heart className={isFavorite ? "size-4 fill-sienna text-sienna" : "size-4"} />
           </button>
         </div>
         <p className="text-sm leading-6 text-muted dark:text-white/70">{lesson.description}</p>
@@ -36,7 +47,7 @@ export function LessonCard({ lesson }: { lesson: Lesson }) {
           <BookOpen className="size-4" />
           {lesson.estimatedMinutes} min
         </div>
-        <Button>
+        <Button onClick={() => onStart?.(lesson)}>
           <Play className="size-4" />
           Start
         </Button>

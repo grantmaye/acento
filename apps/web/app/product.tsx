@@ -9,10 +9,22 @@ import {
   Card,
   Input,
   LessonCard,
+  type NavigationItem,
   ProgressRing,
 } from "@acento/ui";
 import { motion } from "framer-motion";
-import { BookOpen, ChevronRight, Globe2, Search, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  BookOpen,
+  CheckCircle2,
+  ChevronRight,
+  Globe2,
+  Heart,
+  MessageCircle,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  XCircle,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 export function AcentoDashboard({
@@ -23,8 +35,20 @@ export function AcentoDashboard({
   dictionary: DictionaryEntry[];
 }) {
   const [query, setQuery] = useState("");
+  const [activeNav, setActiveNav] = useState<NavigationItem>("Home");
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(
+    "common-dominican-expressions",
+  );
+  const [selectedEntryId, setSelectedEntryId] = useState<string | null>(null);
+  const [favoriteLessonIds, setFavoriteLessonIds] = useState<Set<string>>(new Set());
+  const [practicePromptIndex, setPracticePromptIndex] = useState(0);
   const featured =
     lessons.find((lesson) => lesson.id === "common-dominican-expressions") ?? lessons[0];
+  const selectedLesson = lessons.find((lesson) => lesson.id === selectedLessonId) ?? featured;
+  const selectedEntry =
+    dictionary.find((entry) => entry.id === selectedEntryId) ??
+    dictionary.find((entry) => selectedLesson.relatedDictionaryTerms.includes(entry.id)) ??
+    dictionary[0];
   const filteredDictionary = useMemo(() => {
     const normalized = query.toLowerCase().trim();
     if (!normalized) {
@@ -37,6 +61,31 @@ export function AcentoDashboard({
         .includes(normalized),
     );
   }, [dictionary, query]);
+  const visibleLessons =
+    activeNav === "Practice"
+      ? lessons.filter((lesson) => lesson.practicePrompts.length > 0)
+      : lessons;
+
+  function toggleFavorite(lesson: Lesson) {
+    setFavoriteLessonIds((current) => {
+      const next = new Set(current);
+      if (next.has(lesson.id)) {
+        next.delete(lesson.id);
+      } else {
+        next.add(lesson.id);
+      }
+      return next;
+    });
+  }
+
+  function openLesson(lesson: Lesson) {
+    setSelectedLessonId(lesson.id);
+    setPracticePromptIndex(0);
+    setActiveNav("Learn");
+    document
+      .getElementById("lesson-detail")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   return (
     <main className="min-h-screen pb-28">
@@ -53,8 +102,10 @@ export function AcentoDashboard({
           </div>
         </div>
         <div className="hidden items-center gap-2 md:flex">
-          <Button variant="ghost">Sign in</Button>
-          <Button>Start free</Button>
+          <Button variant="ghost" onClick={() => setActiveNav("Profile")}>
+            Sign in
+          </Button>
+          <Button onClick={() => setActiveNav("Learn")}>Start free</Button>
         </div>
       </header>
 
@@ -121,14 +172,139 @@ export function AcentoDashboard({
             </div>
             <AudioControls />
             <div className="grid gap-3 sm:grid-cols-2">
-              <Button>
+              <Button onClick={() => openLesson(featured)}>
                 Practice
                 <ChevronRight className="size-4" />
               </Button>
-              <Button variant="secondary">Save lesson</Button>
+              <Button variant="secondary" onClick={() => toggleFavorite(featured)}>
+                <Heart
+                  className={
+                    favoriteLessonIds.has(featured.id) ? "size-4 fill-sienna text-sienna" : "size-4"
+                  }
+                />
+                {favoriteLessonIds.has(featured.id) ? "Saved" : "Save lesson"}
+              </Button>
             </div>
           </Card>
         </motion.div>
+      </section>
+
+      <section
+        id="lesson-detail"
+        className="mx-auto grid max-w-7xl gap-6 px-5 py-6 lg:grid-cols-[0.72fr_0.28fr]"
+      >
+        <Card className="space-y-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <Badge>{selectedLesson.level}</Badge>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight">{selectedLesson.title}</h2>
+              <p className="mt-2 max-w-2xl leading-7 text-muted dark:text-white/70">
+                {selectedLesson.description}
+              </p>
+            </div>
+            <Button variant="secondary" onClick={() => toggleFavorite(selectedLesson)}>
+              <Heart
+                className={
+                  favoriteLessonIds.has(selectedLesson.id)
+                    ? "size-4 fill-sienna text-sienna"
+                    : "size-4"
+                }
+              />
+              {favoriteLessonIds.has(selectedLesson.id) ? "Saved" : "Favorite"}
+            </Button>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            {selectedLesson.phrases.slice(0, 4).map((phrase) => (
+              <div
+                className="rounded-lg border border-border p-4 dark:border-white/10"
+                key={phrase.id}
+              >
+                <div className="flex flex-wrap gap-2">
+                  <Badge>{phrase.formality}</Badge>
+                  <Badge>{phrase.slangLevel} slang</Badge>
+                </div>
+                <div className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-muted">
+                  Standard Spanish
+                </div>
+                <p className="mt-1 text-lg">{phrase.standardSpanish}</p>
+                <div className="mt-4 text-xs font-medium uppercase tracking-[0.18em] text-sienna">
+                  Dominican Spanish
+                </div>
+                <p className="mt-1 text-xl font-semibold">{phrase.regionalSpanish[0]?.text}</p>
+                <p className="mt-2 text-sm text-muted dark:text-white/70">{phrase.english}</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-md bg-paper p-3 dark:bg-white/5">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <CheckCircle2 className="size-4 text-sea" />
+                      Safe with
+                    </div>
+                    <p className="mt-2 text-sm text-muted dark:text-white/70">
+                      {phrase.safeToUseWith.join(", ")}
+                    </p>
+                  </div>
+                  <div className="rounded-md bg-paper p-3 dark:bg-white/5">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <XCircle className="size-4 text-sienna" />
+                      Avoid with
+                    </div>
+                    <p className="mt-2 text-sm text-muted dark:text-white/70">
+                      {phrase.avoidWith.join(", ")}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-lg bg-paper p-5 dark:bg-white/5">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="size-4 text-sienna" />
+              <h3 className="font-semibold">Practice prompt</h3>
+            </div>
+            <p className="mt-3 text-lg">{selectedLesson.practicePrompts[practicePromptIndex]}</p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Button
+                onClick={() =>
+                  setPracticePromptIndex(
+                    (current) => (current + 1) % selectedLesson.practicePrompts.length,
+                  )
+                }
+              >
+                Next prompt
+              </Button>
+              <Button variant="secondary" onClick={() => setActiveNav("Conversations")}>
+                Open conversation mode
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="space-y-4">
+          <Badge>Dictionary detail</Badge>
+          <h2 className="text-2xl font-semibold">{selectedEntry?.term}</h2>
+          <p className="leading-7 text-muted dark:text-white/70">{selectedEntry?.meaning}</p>
+          <div className="rounded-md bg-paper p-4 dark:bg-white/5">
+            <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted">
+              Example
+            </div>
+            <p className="mt-2 font-semibold">{selectedEntry?.exampleSentence}</p>
+            <p className="mt-1 text-sm text-muted dark:text-white/70">
+              {selectedEntry?.englishTranslation}
+            </p>
+          </div>
+          <div className="grid gap-2 text-sm">
+            <div>
+              <span className="font-medium">Pronunciation:</span> {selectedEntry?.pronunciation}
+            </div>
+            <div>
+              <span className="font-medium">Safe:</span> {selectedEntry?.safeContexts.join(", ")}
+            </div>
+            <div>
+              <span className="font-medium">Risky:</span> {selectedEntry?.riskyContexts.join(", ")}
+            </div>
+          </div>
+        </Card>
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-6 px-5 py-6 lg:grid-cols-[0.7fr_0.3fr]">
@@ -140,11 +316,19 @@ export function AcentoDashboard({
                 Short lessons with standard and regional Spanish.
               </p>
             </div>
-            <Button variant="ghost">View all</Button>
+            <Button variant="ghost" onClick={() => setActiveNav("Learn")}>
+              View all
+            </Button>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {lessons.slice(0, 6).map((lesson) => (
-              <LessonCard key={lesson.id} lesson={lesson} />
+            {visibleLessons.slice(0, activeNav === "Learn" ? 10 : 6).map((lesson) => (
+              <LessonCard
+                isFavorite={favoriteLessonIds.has(lesson.id)}
+                key={lesson.id}
+                lesson={lesson}
+                onFavorite={toggleFavorite}
+                onStart={openLesson}
+              />
             ))}
           </div>
         </div>
@@ -163,16 +347,23 @@ export function AcentoDashboard({
             />
             <div className="space-y-3">
               {filteredDictionary.slice(0, 5).map((entry) => (
-                <div
-                  className="rounded-md border border-border p-3 dark:border-white/10"
+                <button
+                  className="w-full rounded-md border border-border p-3 text-left transition hover:border-sienna hover:bg-paper dark:border-white/10 dark:hover:bg-white/5"
                   key={entry.id}
+                  onClick={() => {
+                    setSelectedEntryId(entry.id);
+                    setActiveNav("Dictionary");
+                    document
+                      .getElementById("lesson-detail")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="font-semibold">{entry.term}</div>
                     <Badge>{entry.formality}</Badge>
                   </div>
                   <p className="mt-1 text-sm text-muted dark:text-white/70">{entry.meaning}</p>
-                </div>
+                </button>
               ))}
             </div>
           </Card>
@@ -200,7 +391,7 @@ export function AcentoDashboard({
         </aside>
       </section>
 
-      <BottomNavigation />
+      <BottomNavigation active={activeNav} onSelect={setActiveNav} />
     </main>
   );
 }
