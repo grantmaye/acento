@@ -1,0 +1,8 @@
+node_modules
+.next
+dist
+build
+target
+DerivedData
+.gradle
+package-lock.json

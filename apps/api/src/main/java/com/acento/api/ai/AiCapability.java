@@ -1,0 +1,10 @@
+package com.acento.api.ai;
+
+public enum AiCapability {
+    CONVERSATION_TUTOR,
+    ROLEPLAY,
+    PRONUNCIATION_COACH,
+    GRAMMAR_COACH,
+    VOCABULARY_RECOMMENDATIONS,
+    SPEECH_FEEDBACK
+}

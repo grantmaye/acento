@@ -1,0 +1,32 @@
+name: Feature request
+description: Propose a product or engineering improvement.
+title: "[Feature]: "
+labels: ["type: feature", "status: triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - web
+        - api
+        - ios
+        - android
+        - content
+        - admin
+        - ai
+        - design-system
+    validations:
+      required: true

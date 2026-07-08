@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: acento-api
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/acento}
+    username: ${SPRING_DATASOURCE_USERNAME:acento}
+    password: ${SPRING_DATASOURCE_PASSWORD:acento}
+  flyway:
+    enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+server:
+  port: ${SERVER_PORT:8080}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+acento:
+  jwt:
+    issuer: ${ACENTO_JWT_ISSUER:acento-local}
+    secret: ${ACENTO_JWT_SECRET:dev-only-change-me}

@@ -1,0 +1,27 @@
+name: Content review
+description: Review or improve Spanish learning content.
+title: "[Content]: "
+labels: ["type: content", "status: triage"]
+body:
+  - type: textarea
+    id: content
+    attributes:
+      label: Content or phrase
+      description: Include the lesson, dictionary term, or phrase ID.
+    validations:
+      required: true
+  - type: textarea
+    id: concern
+    attributes:
+      label: Concern or improvement
+      description: Explain accuracy, context, safety, regional nuance, or tone concerns.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Review checklist
+      options:
+        - label: This does not invent slang.
+        - label: This preserves standard Spanish and regional Spanish distinction.
+        - label: This explains formality and risky contexts where needed.
