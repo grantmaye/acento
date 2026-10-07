@@ -1,175 +1,93 @@
 # Acento
 
-Acento teaches people how Spanish is actually spoken.
+[![CI](https://github.com/grantmaye/acento/actions/workflows/ci.yml/badge.svg)](https://github.com/grantmaye/acento/actions/workflows/ci.yml)
 
-Not textbook Spanish. Not robotic Spanish. Real Spanish with context, culture, pronunciation, regional usage, and respect for when a phrase is appropriate.
+A regional-Spanish learning prototype that pairs standard and Dominican phrasing with meaning, cultural context, formality, and safe-use guidance. The web experience focuses on one phrase at a time, with an authored practice question and a small dictionary.
 
-The flagship dialect is Dominican Spanish. The platform is intentionally designed to support Puerto Rican, Cuban, Mexican, Colombian, Venezuelan, Argentine, Chilean, and Spain Spanish as first-class regional tracks.
+![Acento web learning session](assets/screenshots/web-home.png)
 
-## Why Acento Exists
+## What works today
 
-Most Spanish products teach learners to pass quizzes. Acento prepares them to have real conversations.
+- A Next.js web flow through five Greetings phrases: compare wording, reveal context, save phrases for the current session, and mark them understood.
+- A lesson-authored practice quiz with explanatory feedback.
+- Searchable Dominican dictionary with examples and usage notes.
+- Ten lessons, fifty phrases, and fourteen dictionary entries in the content package. The web currently exposes Greetings and the dictionary; it has no lesson selector.
+- A separate Spring Boot API with two public scaffold endpoints and Flyway migrations, verified against disposable PostgreSQL in CI.
 
-Every lesson teaches:
+Saved phrases, progress, and the daily goal are held in browser memory and reset on reload. Audio is explicitly unavailable. The web does not call the API. Authentication, durable learner state, real recordings, AI coaching, and connected native clients are future work. This is a portfolio prototype, not a production learning service or a claim of measured fluency outcomes.
 
-- Standard Spanish.
-- Regional Spanish.
-- English meaning.
-- Pronunciation.
-- Cultural context.
-- Safe usage.
-- Avoid-with guidance.
-- Vocabulary and slang level.
-- Audio architecture.
+## Run the web
 
-Slang is never treated as a toy. Acento teaches regional speech with context, caution, and respect.
-
-## Product Philosophy
-
-Think Apple, Linear, Raycast, and Notion. Calm. Premium. Spacious. Precise.
-
-No cartoon clutter. No gamification overload. No fake fluency. The interface should feel like a serious tool for people who care about speaking well.
-
-## Screenshots
-
-Add screenshots as the product matures:
-
-- `assets/screenshots/web-home.png`
-- `assets/screenshots/lesson-detail.png`
-- `assets/screenshots/dictionary.png`
-- `assets/screenshots/ios-home.png`
-- `assets/screenshots/android-home.png`
-
-## Architecture
-
-```mermaid
-flowchart TB
-    Web[Next.js Web] --> API[Spring Boot API]
-    iOS[SwiftUI iOS] --> API
-    Android[Jetpack Compose Android] --> API
-    API --> Postgres[(PostgreSQL)]
-    API -. future .-> Redis[(Redis)]
-    API --> OpenAPI[OpenAPI]
-
-    Web --> Content[@acento/content]
-    Web --> UI[@acento/ui]
-    Web --> Design[@acento/design-system]
-    iOS --> NativeModels[Native mirrored models]
-    Android --> NativeModels
-```
-
-More detail: [docs/architecture.md](docs/architecture.md)
-
-## Tech Stack
-
-| Area     | Stack                                                                                  |
-| -------- | -------------------------------------------------------------------------------------- |
-| Web      | Next.js, TypeScript, Tailwind CSS, shadcn-style primitives, Framer Motion              |
-| iOS      | SwiftUI, native design patterns, Dark Mode, haptics-ready                              |
-| Android  | Jetpack Compose, Material 3                                                            |
-| API      | Java 21, Spring Boot, PostgreSQL, Flyway, OpenAPI, JWT-ready security                  |
-| Monorepo | npm workspaces                                                                         |
-| Quality  | TypeScript strict mode, linting, Prettier, Husky, Conventional Commits, GitHub Actions |
-
-## Folder Structure
-
-```text
-acento/
-├── apps/
-│   ├── web/
-│   ├── ios/
-│   ├── android/
-│   └── api/
-├── packages/
-│   ├── ui/
-│   ├── design-system/
-│   ├── shared/
-│   ├── content/
-│   ├── analytics/
-│   └── localization/
-├── docs/
-├── assets/
-├── scripts/
-├── .github/
-└── README.md
-```
-
-## Starter Content
-
-Acento ships with real starter content from day one:
-
-- 10 starter lessons.
-- 50+ phrase records.
-- 14 Dominican dictionary entries.
-- Standard Spanish and Dominican Spanish side by side.
-- Cultural notes, safe contexts, risky contexts, examples, flashcards, dialogues, quick quizzes, and street-vs-standard comparisons.
-
-Included Dominican terms:
-
-`qué lo qué`, `klk`, `vaina`, `jevi`, `coro`, `tigre`, `chin`, `guagua`, `concho`, `dime a ve`, `ta to`, `mano`, `loco`, `mi amor`.
-
-Content docs: [docs/content-safety.md](docs/content-safety.md)
-
-## Developer Setup
+Node 22+ and npm 10+:
 
 ```sh
-npm install
+npm ci
 npm run content:check
-npm run lint
-npm run test
-npm run build
-```
-
-Run web:
-
-```sh
 npm run dev
 ```
 
-Run API:
+Open `http://localhost:3000`. No API server, account, database, or API key is required for this experience.
+
+## Try it
+
+1. Read the first phrase and choose Compare phrases.
+2. Open Learn why to see formality, safe audiences, and cultural guidance.
+3. Save the phrase, then answer the Greetings practice question. Feedback comes from the authored lesson.
+4. Choose I understand to move on and update session progress.
+5. Search the dictionary for `guagua`, then inspect its example and usage note.
+6. Reload to verify the documented session-only state boundary.
+
+![Acento dictionary example](assets/screenshots/dictionary.png)
+
+Screenshots are actual local Chromium captures from the browser workflow. A [mobile capture](assets/screenshots/web-mobile.png) is included. Native screenshots are not claimed because the native apps remain scaffolds.
+
+## Learn the repository
+
+- [Technical manual](docs/technical-manual.md): beginner-to-maintainer walkthrough, architecture, contracts, setup, exact checks, debugging labs, extension exercises with solutions, and interview questions.
+- [Product story](docs/product-story.md): intended users, a clearly hypothetical scenario, value, limitations, and a 60–90 second demo narration.
+- [Current architecture and future direction](docs/architecture.md).
+- [Content safety and editorial review](docs/content-safety.md).
+- [Dependency review and remaining tooling advisories](docs/dependency-notes.md).
+
+| Area            | Current implementation                                                                          |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| Web             | Next.js, React, TypeScript, Tailwind CSS, Framer Motion                                         |
+| Shared packages | Authored content, types, reusable UI, design tokens; analytics/localization extension utilities |
+| API             | Java 21, Spring Boot, PostgreSQL, Flyway, OpenAPI; no learner write endpoints                   |
+| Native          | SwiftUI source and Jetpack Compose scaffold; not built by CI                                    |
+| Quality         | Formatting, ESLint/types, content checks, desktop/mobile Playwright, PostgreSQL API integration |
+
+## Verify
 
 ```sh
-docker compose -f apps/api/docker-compose.yml up -d
+npm run format:check
+npm run lint
+npm run content:check
+npm run test --workspaces --if-present
+npm run build
+npx playwright install chromium
+npm run test:e2e
+```
+
+The workspace `test` is TypeScript checking; Playwright provides browser behavior coverage. API tests are separate and require Java 21, Maven, and a running Docker engine:
+
+```sh
+mvn -f apps/api/pom.xml test
+```
+
+Root `npm test` includes both workspace checks and the API tests. The API tests fail when Docker is unavailable, rather than silently reporting skipped integration coverage. CI runs web/packages and API jobs; it does not deploy the app.
+
+## Explore the API foundation
+
+```sh
+docker compose -f apps/api/docker-compose.yml up -d postgres
 mvn -f apps/api/pom.xml spring-boot:run
 ```
 
-Web: `http://localhost:3000`  
-API Swagger: `http://localhost:8080/swagger-ui.html`
+The local database uses host port 5433. Swagger UI is `http://localhost:8080/swagger-ui.html`. `/api/public/content/dialects` lists regional identifiers; `/api/public/content/status` describes the authored content source. These are scaffold endpoints, not a connected course or learner service. The security configuration is permissive and the JWT class returns a non-authenticating preview marker.
 
-## Deployment
+See [deployment boundaries](docs/deployment.md) and the manual before considering hosting. [Roadmap](docs/roadmap.md) items are direction, not completed functionality.
 
-- Web: Vercel-ready Next.js app in `apps/web`.
-- API: Docker-ready Spring Boot service in `apps/api`.
-- Database: PostgreSQL.
-- Redis: planned for cache, sessions, rate limiting, and async practice state.
-- CI/CD: GitHub Actions.
+## Contributing and license
 
-Deployment notes: [docs/deployment.md](docs/deployment.md)
-
-## Roadmap
-
-### Phase 1
-
-Repository, design system, authentication architecture, navigation, home, lesson engine, dictionary, starter lessons.
-
-### Phase 2
-
-Progress, favorites, offline architecture, audio, phrase trainer.
-
-### Phase 3
-
-AI, speech recognition, conversation coach, native app build targets.
-
-### Phase 4
-
-Teacher dashboard, content CMS, enterprise, analytics.
-
-Full roadmap: [docs/roadmap.md](docs/roadmap.md)
-
-## Contributing
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/content-safety.md](docs/content-safety.md) before contributing content.
-
-## License
-
-MIT
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and [content safety](docs/content-safety.md) before contributing, especially regional-language content. Existing license: [MIT](LICENSE).

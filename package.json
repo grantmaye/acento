@@ -2,7 +2,7 @@
   "name": "acento",
   "version": "0.1.0",
   "private": true,
-  "description": "A production-grade Spanish learning platform for real regional Spanish, starting with Dominican Spanish.",
+  "description": "Regional Spanish learning prototype with contextual Dominican starter content, a Next.js web app, and API/native foundations.",
   "workspaces": [
     "apps/web",
     "packages/*"
@@ -13,17 +13,19 @@
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present && npm run test:api",
     "test:api": "mvn -f apps/api/pom.xml test",
-    "content:check": "tsx scripts/check-content.mjs",
+    "content:check": "node --import tsx scripts/check-content.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "husky": "^9.1.7",
     "prettier": "^3.6.2",
-    "tsx": "^4.20.6"
+    "tsx": "^4.20.6",
+    "@playwright/test": "^1.63.0"
   },
   "engines": {
     "node": ">=22",

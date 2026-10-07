@@ -1,6 +1,6 @@
 # Audio Architecture
 
-Every phrase is modeled for audio even before recordings exist.
+Every phrase is modeled for audio even before recordings exist. The current data uses placeholder references; the web shows an unavailable control and performs no playback. The capabilities below are future design requirements, not implemented features.
 
 ## Required Audio Variants
 
