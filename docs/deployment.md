@@ -1,58 +1,33 @@
-# Deployment
+# Build and deployment boundaries
+
+The repository provides buildable web code and an API Dockerfile. The GitHub workflow runs verification only; it does not publish, deploy, provision accounts, or configure a production database. No live deployment or production readiness is claimed.
 
 ## Web
 
-The web app is Vercel-ready.
+Build from the monorepo root so npm workspaces resolve:
 
 ```sh
-npm run build --workspace @acento/web
+npm ci
+npm run build
+npm run start --workspace @acento/web -- --port 3000
 ```
 
-Environment:
-
-```text
-NEXT_PUBLIC_API_URL=https://api.acento.app
-```
+The web page imports authored content and keeps learning state in memory. It does not currently use `NEXT_PUBLIC_API_URL`, so configuring that variable will not connect learner state to the API. The Next.js workspace is `apps/web`; any host configuration must preserve access to the shared packages.
 
 ## API
 
-The API is Docker-ready.
+The API Docker build uses Java 21 and Maven:
 
 ```sh
 docker build -t acento-api apps/api
 ```
 
-Required environment:
+Supply `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD` through the process environment. `SERVER_PORT` defaults to 8080. The local Compose setup exposes PostgreSQL at host port 5433; containers connecting to the Compose service would use its internal port 5432. `application.yml` defaults are for disposable local development.
 
-```text
-SPRING_DATASOURCE_URL
-SPRING_DATASOURCE_USERNAME
-SPRING_DATASOURCE_PASSWORD
-ACENTO_JWT_ISSUER
-ACENTO_JWT_SECRET
-```
+Flyway owns the API's schema. The database tables are a foundation and are not the current web session's system of record. The JWT issuer/secret configuration does not activate authentication: security is permissive and the token service only returns a preview. Do not expose personal learner data through this scaffold without implementing and testing identity and authorization first.
 
-## Database
+## Unimplemented operating requirements
 
-PostgreSQL is the system of record. Flyway owns migrations.
+Real hosting needs a deliberate identity model, durable learner-state APIs, environment/secret management, backups and recovery, retention/privacy choices, monitoring, content review operations, and appropriate request controls. Redis is listed in Compose for future work but has no current application integration. Native builds and distribution are also future work.
 
-## Redis
-
-Redis is planned for:
-
-- Rate limiting.
-- Session-adjacent ephemeral state.
-- Practice state.
-- Conversation mode state.
-- Cache for dictionary/search views.
-
-## CI/CD
-
-GitHub Actions runs:
-
-- npm install.
-- format check.
-- lint.
-- TypeScript/package tests.
-- Next.js build.
-- Maven API tests.
+See [technical manual](technical-manual.md) for reproducible setup/tests and [dependency notes](dependency-notes.md) for current audit limits. This document is a readiness boundary, not authorization to deploy.

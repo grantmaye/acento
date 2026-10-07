@@ -37,7 +37,7 @@ export function AcentoDashboard({
   const lesson = lessons.find((item) => item.id === "greetings") ?? lessons[0];
   const [activeNav, setActiveNav] = useState<NavigationItem>("Today");
   const [phraseIndex, setPhraseIndex] = useState(0);
-  const [hasListened, setHasListened] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
   const [showWhy, setShowWhy] = useState(false);
   const [practiceAnswer, setPracticeAnswer] = useState<string | null>(null);
   const [savedPhraseIds, setSavedPhraseIds] = useState<Set<string>>(new Set());
@@ -103,7 +103,7 @@ export function AcentoDashboard({
     }
     setPracticeAnswer(null);
     setShowWhy(false);
-    setHasListened(false);
+    setShowComparison(false);
     setPhraseIndex((current) => (current + 1) % lesson.phrases.length);
     selectNav("Today");
   }
@@ -138,8 +138,11 @@ export function AcentoDashboard({
             Learn this well. Then move on.
           </h1>
           <p className="mt-5 text-lg leading-8 text-muted dark:text-white/70">
-            Acento keeps the session small: hear the phrase, understand the situation, try one
+            Acento keeps the session small: read the phrase, understand the situation, try one
             prompt, and save it if it matters to you.
+          </p>
+          <p className="mt-3 text-sm text-muted">
+            Prototype session: saved phrases and progress reset when you reload.
           </p>
         </div>
 
@@ -163,10 +166,17 @@ export function AcentoDashboard({
             </button>
           </div>
 
-          <AudioControls onPlay={() => setHasListened(true)} />
+          <AudioControls />
+          <Button
+            variant="secondary"
+            aria-expanded={showComparison}
+            onClick={() => setShowComparison((current) => !current)}
+          >
+            {showComparison ? "Hide comparison" : "Compare phrases"}
+          </Button>
 
           <AnimatePresence>
-            {hasListened ? (
+            {showComparison ? (
               <motion.div
                 animate={{ opacity: 1, y: 0 }}
                 className="grid gap-3 md:grid-cols-2"
@@ -240,17 +250,11 @@ export function AcentoDashboard({
 
           <div className="rounded-lg bg-paper p-5 dark:bg-white/5">
             <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted">Prompt</div>
-            <p className="mt-3 text-xl font-semibold">
-              You are greeting a close friend by text. Which version fits best?
-            </p>
+            <p className="mt-3 text-xl font-semibold">{lesson.quickQuiz.prompt}</p>
           </div>
 
           <div className="grid gap-3">
-            {[
-              regional?.text ?? "",
-              phrase?.standardSpanish ?? "",
-              "Muy buenos días, estimado señor.",
-            ].map((answer, index) => (
+            {lesson.quickQuiz.options.map((answer, index) => (
               <button
                 className={
                   practiceAnswer === answer
@@ -266,16 +270,15 @@ export function AcentoDashboard({
           </div>
 
           {practiceAnswer ? (
-            <div className="rounded-lg bg-ink p-5 text-paper dark:bg-paper dark:text-ink">
+            <div
+              role="status"
+              className="rounded-lg bg-ink p-5 text-paper dark:bg-paper dark:text-ink"
+            >
               <div className="flex items-center gap-2 font-medium">
                 <Check className="size-4" />
-                {practiceAnswer === regional?.text ? "Good fit." : "Close, but context matters."}
+                {practiceAnswer === lesson.quickQuiz.answer ? "Good fit." : "Try another answer."}
               </div>
-              <p className="mt-2 text-sm leading-6 opacity-80">
-                {practiceAnswer === regional?.text
-                  ? "This is casual and works with friends. Avoid it in formal settings."
-                  : "The standard version is useful, but this moment is casual. Acento teaches both so you can choose safely."}
-              </p>
+              <p className="mt-2 text-sm leading-6 opacity-80">{lesson.quickQuiz.explanation}</p>
             </div>
           ) : null}
 
@@ -335,6 +338,11 @@ export function AcentoDashboard({
             value={dictionaryQuery}
           />
           <div className="space-y-2">
+            {filteredDictionary.length === 0 ? (
+              <p role="status" className="text-sm text-muted">
+                No matching terms. Try a broader search.
+              </p>
+            ) : null}
             {filteredDictionary.map((entry) => (
               <button
                 className={

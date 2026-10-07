@@ -6,3 +6,6 @@ target
 DerivedData
 .gradle
 package-lock.json
+
+test-results/
+playwright-report/
